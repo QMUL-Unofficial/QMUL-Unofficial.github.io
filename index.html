@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QMUL - Unofficial : Resources</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --text: #e0e0e0;
+            --accent: #4da6ff;
+            --green: #00ff88;
+            --red: #ff3b30;
+            --sidebar: #121212;
+            --border: #333;
+            --panel: #1e1e1e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 340px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 30px 24px;
+            overflow-y: auto;
+            gap: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: width 0.3s ease, padding 0.3s ease;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .subject {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topic-item {
+            padding: 14px 16px;
+            margin: 6px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            font-size: 15px;
+        }
+
+        .topic-item:hover { background: #252525; }
+        .topic-item.active {
+            background: #252525;
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 15px rgba(77, 166, 255, 0.25);
+        }
+
+        .topic-item svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            opacity: 0.8;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* centre welcome */
+            gap: 20px;
+            position: relative;
+        }
+
+        .welcome h1 {
+            font-size: 46px;
+            background: linear-gradient(90deg, #4da6ff, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        #flashcard-app {
+            display: none;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .stats-bar {
+            width: 100%;
+            background: var(--panel);
+            padding: 16px 24px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat strong { color: #aaa; }
+        .stat span { color: var(--accent); font-weight: 600; }
+
+        .card {
+            width: 100%;
+            min-height: 360px;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        .tag {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: rgba(77,166,255,0.2);
+            color: var(--accent);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #answer-input {
+            flex: 1;
+            padding: 16px 20px;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 17px;
+        }
+
+        button {
+            padding: 16px 32px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        button:hover { background: #3385ff; transform: translateY(-2px); }
+        #next-btn { display: none; background: #333; }
+        #next-btn:hover { background: #444; }
+
+        .correct {
+            border: 3px solid var(--green) !important;
+            box-shadow: 0 0 40px rgba(0,255,136,0.5) !important;
+        }
+
+        .incorrect {
+            border: 3px solid var(--red) !important;
+            box-shadow: 0 0 40px rgba(255,59,48,0.5) !important;
+        }
+
+        /* Tag selector with dropdown + pills + hide */
+        .tag-selector {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 25px;
+            margin-top: 10px;
+        }
+
+        .tag-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tag-header strong {
+            font-size: 15px;
+        }
+
+        .tag-toggle-btn {
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            background: #252525;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            color: #bbb;
+            transform: none;
+        }
+
+        .tag-toggle-btn:hover {
+            background: #333;
+            color: #fff;
+            transform: none;
+        }
+
+        .tag-select-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .tag-selector select {
+            flex: 1;
+            padding: 12px;
+            background: #1e1e1e;
+            border: 1px solid #444;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+
+        #clear-tags-btn,
+        #mixed-btn {
+            padding: 10px 16px;
+            font-size: 13px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        #clear-tags-btn {
+            background: #333;
+            color: white;
+        }
+
+        #clear-tags-btn:hover {
+            background: #444;
+            transform: none;
+        }
+
+        #mixed-btn {
+            background: var(--accent);
+            color: white;
+        }
+
+        #mixed-btn:hover {
+            background: #3385ff;
+            transform: none;
+        }
+
+        .selected-tags {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #252525;
+            border: 1px solid var(--accent);
+            font-size: 12px;
+        }
+
+        .tag-pill button {
+            padding: 0 4px;
+            font-size: 14px;
+            border-radius: 999px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #bbb;
+        }
+
+        .tag-pill button:hover {
+            color: white;
+        }
+
+        /* Tiny "Tags" floating button when box is hidden */
+        .floating-tags-toggle {
+            margin-top: -10px;
+            margin-bottom: 20px;
+            align-self: flex-start;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 999px;
+            background: #252525;
+            border: 1px solid var(--border);
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .floating-tags-toggle:hover {
+            background: #333;
+            transform: none;
+        }
+
+        /* Sidebar toggle bar – vertical, parallel to sidebar */
+        .sidebar-toggle {
+            position: fixed;
+            top: 50%;                  /* vertically centered */
+            left: 340px;               /* same as sidebar width */
+            transform: translate(-50%, -50%); /* half on, half off */
+
+            width: 14px;
+            height: 80px;
+            border-radius: 999px;
+            box-sizing: border-box;
+            padding: 0;
+            overflow: hidden;
+
+            background: #151515;
+            border: 1px solid #333;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            cursor: pointer;
+            z-index: 200;
+
+            transition: left 0.3s ease;
+        }
+
+        /* small chevron arrow only */
+        .sidebar-toggle::after {
+            content: "";
+            border-style: solid;
+            border-width: 6px 0 6px 6px;                    /* pointing left */
+            border-color: transparent transparent transparent #bfbfbf;
+            opacity: 0.9;
+        }
+
+        /* kill global hover animation for this button */
+        .sidebar-toggle:hover {
+            background: #151515 !important;
+            transform: translate(-50%, -50%) !important;
+            box-shadow: none !important;
+        }
+
+        /* hide the old text arrow completely */
+        .sidebar-toggle .arrow {
+            display: none;
+        }
+
+        /* Collapsed sidebar: move bar inwards but keep half–half,
+           and flip arrow to point right */
+        body.sidebar-collapsed .sidebar-toggle {
+            left: 80px; /* collapsed sidebar width */
+        }
+
+        body.sidebar-collapsed .sidebar-toggle::after {
+            border-width: 6px 6px 6px 0;                    /* pointing right */
+            border-color: transparent #bfbfbf transparent transparent;
+        }
+
+        /* Collapsed sidebar state */
+        body.sidebar-collapsed .sidebar {
+            width: 80px;
+            padding: 24px 10px;
+        }
+
+        body.sidebar-collapsed .logo,
+        body.sidebar-collapsed .subject,
+        body.sidebar-collapsed .topic-item span {
+            display: none;
+        }
+
+        body.sidebar-collapsed .topic-item svg {
+            opacity: 1;
+            transform: scale(1.08);
+        }
+
+        /* Fullscreen toggle – circular button bottom-left */
+        .fullscreen-toggle {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #151515;
+            border: 1px solid #333;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 210;
+            padding: 0;
+            font-size: 20px;
+        }
+
+        /* kill global hover anim for fullscreen button too */
+        .fullscreen-toggle:hover {
+            background: #151515 !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* FULLSCREEN MODE */
+        body.fullscreen .sidebar {
+            display: none;
+        }
+
+        body.fullscreen .sidebar-toggle {
+            display: none;
+        }
+
+        body.fullscreen .main {
+            padding: 24px 40px 120px;
+            justify-content: flex-start;
+        }
+
+        body.fullscreen #flashcard-app {
+            max-width: 1000px;
+        }
+
+        body.fullscreen .stats-bar {
+            margin-top: 8px;
+        }
+
+        /* Input as bottom pill in fullscreen */
+        body.fullscreen .input-group {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 24px;
+            width: calc(100% - 48px); /* 24px side spacing */
+            max-width: 900px;
+            background: #151515;
+            border-radius: 999px;
+            border: 1px solid #333;
+            padding: 8px 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            align-items: center;
+            margin-top: 0;
+        }
+
+        body.fullscreen #answer-input {
+            background: transparent;
+            border: none;
+            padding: 10px 12px;
+            border-radius: 999px;
+        }
+
+        body.fullscreen #submit-btn,
+        body.fullscreen #next-btn {
+            padding: 10px 16px;
+            border-radius: 999px;
+            font-size: 14px;
+        }
+
+        body.fullscreen #next-btn {
+            background: #333;
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+            .main { padding: 20px; }
+
+            /* On mobile just pin sidebar toggle below the header on the left */
+            .sidebar-toggle {
+                top: 70px;
+                left: 20px;
+                transform: none;
+                height: 50px;
+            }
+
+            body.sidebar-collapsed .sidebar {
+                width: 100%;
+            }
+            body.sidebar-collapsed .sidebar-toggle {
+                left: 20px;
+            }
+
+            .card { font-size: 24px; padding: 30px; }
+
+            /* Fullscreen bottom pill spacing a bit tighter on mobile */
+            body.fullscreen .input-group {
+                bottom: 16px;
+                width: calc(100% - 32px);
+            }
+
+            .fullscreen-toggle {
+                bottom: 16px;
+                left: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toggle for sidebar -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+        <span class="arrow">◀</span>
+    </button>
+
+    <!-- Fullscreen mode toggle -->
+    <button id="fullscreen-toggle" class="fullscreen-toggle" aria-label="Toggle fullscreen">
+        ⤢
+    </button>
+
+    <div class="sidebar">
+        <div class="logo">QMResources</div>
+
+        <div class="subject">Mathematics</div>
+        <div class="topic-item active" data-topic="intro_analysis">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>Intro to Analysis in Calculus</span>
+        </div>
+
+        <div class="subject">Psychology</div>
+        <div class="topic-item" data-topic="psychology">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1l-4.5-4.5c.5-1.16 1.25-2.2 2.19-3.06L11 12l2.25-2.25c1.27-1.27 3.05-2.02 4.94-2.02 4.18 0 7.81 3.42 7.81 7.81 0 4.08-3.16 7.44-7.19 7.81-.38.03-.75.05-1.12.05z"/>
+            </svg>
+            <span>Exploring Psychology (PSY124)</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="welcome" id="welcome">
+            <h1>Select a topic to begin</h1>
+            <p>Smart active recall • Keyword answers for Psych • Score tracking</p>
+        </div>
+
+        <div id="flashcard-app">
+            <div class="stats-bar">
+                <div class="stat"><strong>Score:</strong> <span id="score">0 / 0</span></div>
+                <div class="stat"><strong>Remaining:</strong> <span id="remaining">0</span></div>
+                <div class="stat"><strong>Streak:</strong> <span id="streak">0</span></div>
+            </div>
+
+            <!-- Tiny button appears when tag box is hidden -->
+            <button type="button" id="show-tags-btn" class="floating-tags-toggle" style="display:none;">
+                Tags
+            </button>
+
+            <!-- Dropdown Tag Selector with pills + hide button -->
+            <div class="tag-selector" id="tag-selector" style="display:none;">
+                <div class="tag-header">
+                    <strong>Choose tags to study:</strong>
+                    <button type="button" id="toggle-tags-btn" class="tag-toggle-btn">Hide</button>
+                </div>
+                <div class="tag-select-row">
+                    <select id="tag-dropdown">
+                        <option value="" disabled selected>Select a tag...</option>
+                    </select>
+                    <button type="button" id="mixed-btn">Mixed</button>
+                    <button type="button" id="clear-tags-btn">Clear</button>
+                </div>
+                <div class="selected-tags" id="selected-tags"></div>
+            </div>
+
+            <div class="card" id="card">
+                <div class="tag" id="tag"></div>
+                <div id="card-content">Ready when you are!</div>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="answer-input" placeholder="Type keywords (Psych) or exact answer (Math)" autocomplete="off">
+                <button id="submit-btn">Check</button>
+                <button id="next-btn">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const topics = {
+            intro_analysis: [
+                {q: "ε-δ definition of limit", a: "For every ε > 0 there exists δ > 0 such that if 0 < |x-a| < δ then |f(x)-L| < ε", tag: "limits"},
+                {q: "Squeeze Theorem", a: "If g(x) ≤ f(x) ≤ h(x) near a and lim g = lim h = L, then lim f = L", tag: "limits"},
+                {q: "lim_{θ→0} sinθ/θ", a: "1", tag: "trig limits"},
+                {q: "lim_{θ→0} (1-cosθ)/θ²", a: "1/2", tag: "trig limits"},
+                {q: "Definition of continuity at c", a: "lim_{x→c} f(x) = f(c)", tag: "continuity"},
+                {q: "Is |x| differentiable at 0?", a: "no", tag: "differentiability"},
+                {q: "Does differentiability ⇒ continuity?", a: "yes", tag: "differentiability"},
+                {q: "Derivative of sin x", a: "cos x", tag: "derivatives"},
+                {q: "Derivative of cos x", a: "-sin x", tag: "derivatives"},
+                {q: "Product Rule", a: "(fg)' = f'g + fg'", tag: "rules"},
+                {q: "Chain Rule", a: "(f∘g)' = f'(g(x)) g'(x)", tag: "rules"},
+                {q: "Mean Value Theorem", a: "exists c: f'(c) = [f(b)-f(a)]/(b-a)", tag: "MVT"}
+            ],
+            psychology: [
+                // --- Original 9 ---
+                {q: "What is the definition of social psychology?", a: "Scientific study of how people think about, influence, and relate to one another", tag: "social psych"},
+                {q: "What is the fundamental attribution error?", a: "Overemphasising personality and underestimating the situation when explaining others’ behaviour", tag: "attributions"},
+                {q: "What is a stereotype?", a: "A belief about traits or characteristics of members of a group", tag: "prejudice"},
+                {q: "What is prejudice?", a: "A negative attitude toward a group and its members", tag: "prejudice"},
+                {q: "What is the mere exposure effect?", a: "Repeated exposure increases liking", tag: "attraction"},
+                {q: "What characterises secure attachment?", a: "Child distressed on departure and soothed on return", tag: "attachment"},
+                {q: "What is System 1?", a: "Fast, automatic, emotional", tag: "decision making"},
+                {q: "What is cognitive dissonance?", a: "Discomfort from holding inconsistent beliefs", tag: "attitudes"},
+                {q: "What is the bystander effect?", a: "People are less likely to help when others are present", tag: "helping"},
+
+                // --- Intro / basic concepts ---
+                {q: "What is the definition of psychology?", a: "Scientific study of behaviour and the mind", tag: "intro"},
+                {q: "In psychology what is meant by behaviour?", a: "Directly observable actions and responses", tag: "intro"},
+                {q: "In psychology what is meant by the mind?", a: "Internal states and processes that must be inferred from behaviour", tag: "intro"},
+                {q: "Name one goal of psychology.", a: "To describe behaviour", tag: "goals of psychology"},
+                {q: "Name a second goal of psychology.", a: "To understand the causes of behaviour", tag: "goals of psychology"},
+                {q: "Name a third goal of psychology.", a: "To predict how people will behave", tag: "goals of psychology"},
+                {q: "Name a fourth goal of psychology.", a: "To influence or control behaviour", tag: "goals of psychology"},
+                {q: "Name a fifth goal of psychology.", a: "To apply psychological knowledge to improve welfare", tag: "goals of psychology"},
+                {q: "What is basic psychological research?", a: "Research seeking knowledge for its own sake", tag: "research"},
+                {q: "What is applied psychological research?", a: "Research designed to solve specific practical problems", tag: "research"},
+                {q: "What is critical thinking in psychology?", a: "Actively evaluating evidence rather than accepting claims at face value", tag: "critical thinking"},
+
+                // --- Levels of analysis / nature-nurture ---
+                {q: "What is the biological level of analysis?", a: "Level focusing on brain processes and genetic influences", tag: "levels"},
+                {q: "What is the psychological level of analysis?", a: "Level focusing on thoughts feelings motives and personality", tag: "levels"},
+                {q: "What is the environmental level of analysis?", a: "Level focusing on past and current physical and social environments", tag: "levels"},
+                {q: "What question is asked in the nature versus nurture debate?", a: "Whether behaviour is shaped more by biology or by experience", tag: "nature nurture"},
+                {q: "What is mind body dualism?", a: "View that mind is a separate spiritual entity from the body", tag: "historical roots"},
+                {q: "What is monism?", a: "View that mind and body are the same and obey physical laws", tag: "historical roots"},
+                {q: "What is empiricism?", a: "View that all ideas and knowledge are gained through the senses", tag: "historical roots"},
+
+                // --- Schools of thought / perspectives ---
+                {q: "What does the psychodynamic perspective emphasise?", a: "Unconscious motives and early childhood experiences", tag: "psychodynamic"},
+                {q: "What is psychoanalysis?", a: "Therapy based on analysing unconscious conflicts and motives", tag: "psychodynamic"},
+                {q: "What does the behavioural perspective focus on?", a: "How the external environment and learning shape behaviour", tag: "behavioural"},
+                {q: "According to behaviourism what mainly determines behaviour?", a: "Habits formed by past experiences and current stimuli", tag: "behavioural"},
+                {q: "What does the humanistic perspective emphasise?", a: "Free will personal growth and search for meaning", tag: "humanistic"},
+                {q: "What is self-actualisation?", a: "Inborn motive to reach one’s full potential", tag: "humanistic"},
+                {q: "What does the cognitive perspective study?", a: "How mental processes influence behaviour", tag: "cognitive"},
+                {q: "What is cognitive neuroscience?", a: "Study of brain activity while people perform cognitive tasks", tag: "cognitive"},
+                {q: "What does the biological perspective examine?", a: "How brain processes and bodily functions regulate behaviour", tag: "biological"},
+                {q: "What does the sociocultural perspective focus on?", a: "How social environment and culture influence behaviour", tag: "sociocultural"},
+                {q: "What is evolutionary psychology interested in?", a: "How evolution shaped modern human behaviour", tag: "biological"},
+                {q: "What is positive psychology?", a: "Movement studying human strengths fulfilment and optimal living", tag: "humanistic"},
+
+                // --- Emotion and affect & decisions ---
+                {q: "In psychology what is an emotion?", a: "A positive or negative experience linked to a specific pattern of physiological activity", tag: "emotions"},
+                {q: "What is affect in decision making?", a: "Basic feeling that something is good or bad", tag: "emotions"},
+                {q: "According to dual process theory what describes System 1?", a: "Fast automatic intuitive", tag: "decision making"},
+                {q: "According to dual process theory what describes System 2?", a: "Slow effortful analytical", tag: "decision making"},
+                {q: "How does positive affect influence problem solving?", a: "It promotes cognitive flexibility creativity and better problem solving", tag: "positive affect"},
+                {q: "In Isen’s studies what simple manipulation often induced positive affect?", a: "Giving a small gift such as sweets", tag: "positive affect"},
+                {q: "When stakes are high how does positive affect influence risk taking?", a: "It leads to reduced risk taking", tag: "positive affect"},
+                {q: "When stakes are low how does positive affect influence risk taking?", a: "It can increase willingness to take risks", tag: "positive affect"},
+                {q: "How did positive affect influence doctors in Estrada et al.’s study?", a: "Doctors in a good mood were more creative and quicker to reach correct diagnoses", tag: "positive affect"},
+                {q: "In Wilson’s poster study who was more satisfied with their choice after six weeks?", a: "Those who chose based on feelings not written reasons", tag: "decision making"},
+                {q: "What did Dijksterhuis and van Olden conclude about complex decisions?", a: "Unconscious thought after a delay can lead to better choices than immediate reasoning", tag: "decision making"},
+                {q: "According to Caruso and Shafir how can thinking about mood affect choices?", a: "Imagining a mood can shift preferences such as choosing a comedy over a drama", tag: "emotions"},
+
+                // --- Psychic numbing / saving lives ---
+                {q: "What is psychic numbing?", a: "Reduced sensitivity to large numbers of victims in mass tragedies", tag: "genocide"},
+                {q: "Normatively how should we value saving lives?", a: "Each life should have equal value so value increases linearly with number saved", tag: "genocide"},
+                {q: "Psychophysically how do people actually value saving lives?", a: "Value rises quickly at first then levels off as numbers increase", tag: "genocide"},
+                {q: "Do people prefer saving a higher proportion or a larger absolute number of lives?", a: "Often they prefer saving a higher proportion even if fewer lives are saved", tag: "genocide"},
+                {q: "Why are images powerful in motivating help?", a: "They evoke strong affect whereas statistics alone often fail", tag: "genocide"},
+                {q: "Are people more willing to help identifiable victims or statistical victims?", a: "Identifiable individual victims", tag: "genocide"},
+
+                // --- Social psychology / attraction / social cognition ---
+                {q: "In social psychology what is social facilitation?", a: "Improved performance on simple tasks in the presence of others", tag: "social psych"},
+                {q: "In social psychology what is social loafing?", a: "Reduced effort when working in a group compared with alone", tag: "social psych"},
+                {q: "Name one antecedent of attraction from social psychology.", a: "Physical attractiveness", tag: "attraction"},
+                {q: "Name a second antecedent of attraction.", a: "Proximity or repeated interaction", tag: "attraction"},
+                {q: "Name a third antecedent of attraction.", a: "Mere exposure or familiarity", tag: "attraction"},
+                {q: "Name a fourth antecedent of attraction.", a: "Perceived similarity", tag: "attraction"},
+                {q: "What is the mere exposure effect in attraction?", a: "Repeated exposure to a person increases liking for them", tag: "attraction"},
+                {q: "What is the halo effect in social perception?", a: "Tendency to assume attractive people have other positive traits", tag: "social cognition"},
+                {q: "What is a personal or internal attribution?", a: "Explaining behaviour by referring to traits or abilities", tag: "attributions"},
+                {q: "What is a situational or external attribution?", a: "Explaining behaviour by referring to circumstances or environment", tag: "attributions"},
+                {q: "What is the actor observer bias?", a: "Explaining our own behaviour by situations but others’ by traits", tag: "attributions"},
+
+                // --- Prejudice / stereotypes / social identity / comparison ---
+                {q: "What is discrimination in social psychology?", a: "Negative behaviour toward people based on group membership", tag: "prejudice"},
+                {q: "What is an ingroup?", a: "Group we see ourselves as belonging to", tag: "social identity"},
+                {q: "What is an outgroup?", a: "Group we see as other or them", tag: "social identity"},
+                {q: "According to social identity theory what does group membership provide?", a: "A sense of who we are and our place in the world", tag: "social identity"},
+                {q: "What is social categorisation?", a: "Dividing the social world into groups which sharpens between-group differences", tag: "social identity"},
+                {q: "What is social comparison theory?", a: "Idea that we evaluate ourselves by comparing with others", tag: "social comparison"},
+                {q: "What is an upward social comparison?", a: "Comparing ourselves to someone we see as better off", tag: "social comparison"},
+                {q: "What is a downward social comparison?", a: "Comparing ourselves to someone worse off to protect self esteem", tag: "social comparison"},
+
+                // --- Developmental psychology basics ---
+                {q: "What does developmental psychology study?", a: "Physical social cognitive and emotional changes across the lifespan", tag: "development"},
+                {q: "What is meant by plasticity in development?", a: "Capacity for change in response to experience", tag: "development"},
+                {q: "What is a critical period in development?", a: "Specific time when experience must occur for normal development", tag: "development"},
+                {q: "What is a sensitive period in development?", a: "Time when experience is especially influential but not absolutely required", tag: "development"},
+
+                // --- Attachment & early emotional development ---
+                {q: "According to attachment theory what is a secure base?", a: "Caregiver who provides safety from which child can explore", tag: "attachment"},
+                {q: "In the strange situation what is avoidant attachment?", a: "Child shows little distress on separation and avoids caregiver on return", tag: "attachment"},
+                {q: "In the strange situation what is resistant attachment?", a: "Child is very distressed and not easily soothed on reunion", tag: "attachment"},
+                {q: "In the strange situation what is disorganised attachment?", a: "Child shows contradictory or confused behaviours", tag: "attachment"},
+                {q: "What is primary intersubjectivity?", a: "Early mutual emotional exchange between infant and caregiver", tag: "early emotions"},
+                {q: "What is social smiling in infancy?", a: "Smile that appears in response to seeing another person", tag: "early emotions"},
+
+                // --- Sensory development ---
+                {q: "How do newborns prefer to listen in hearing studies?", a: "They prefer their mother’s voice", tag: "sensory"},
+                {q: "What can young infants do with speech sounds?", a: "They can distinguish different phonemes", tag: "sensory"},
+                {q: "What visual stimuli do newborns particularly prefer?", a: "Face like patterns and eye region", tag: "sensory"},
+                {q: "What is habituation in infant research?", a: "Decreased response to a repeated stimulus", tag: "sensory"},
+
+                // --- Piaget / cognitive development ---
+                {q: "According to Piaget what is a schema?", a: "Mental structure used to understand the world", tag: "piaget"},
+                {q: "In Piagetian theory what is assimilation?", a: "Fitting new experiences into existing schemas", tag: "piaget"},
+                {q: "In Piagetian theory what is accommodation?", a: "Changing schemas to fit new experiences", tag: "piaget"},
+                {q: "What is Piaget’s sensorimotor stage?", a: "Stage where infants coordinate senses with actions from birth to about two years", tag: "piaget"},
+                {q: "What is Piaget’s preoperational stage?", a: "Stage where children use symbols but show egocentrism and centration", tag: "piaget"},
+                {q: "What is Piaget’s concrete operational stage?", a: "Stage where children can think logically about concrete events", tag: "piaget"},
+                {q: "What is Piaget’s formal operational stage?", a: "Stage where adolescents can think abstractly and hypothetically", tag: "piaget"},
+                {q: "What is object permanence?", a: "Understanding that objects continue to exist when out of sight", tag: "piaget"},
+                {q: "What is the A not B error?", a: "Infant searches for object in old location A even after seeing it hidden at B", tag: "piaget"}
+            ]
+        };
+
+        const keywordMap = {
+            // --- original ---
+            "What is the definition of social psychology?": ["scientific", "influence"],
+            "What is the fundamental attribution error?": ["personality", "situation"],
+            "What is a stereotype?": ["belief", "group"],
+            "What is prejudice?": ["negative", "attitude"],
+            "What is the mere exposure effect?": ["repeated", "liking"],
+            "What characterises secure attachment?": ["distressed", "soothed"],
+            "What is System 1?": ["fast", "automatic"],
+            "What is cognitive dissonance?": ["discomfort", "inconsistent"],
+            "What is the bystander effect?": ["less", "help", "others"],
+
+            // intro / basics
+            "What is the definition of psychology?": ["scientific", "behaviour", "mind"],
+            "In psychology what is meant by behaviour?": ["observable", "actions"],
+            "In psychology what is meant by the mind?": ["internal", "states"],
+            "Name one goal of psychology.": ["describe", "behaviour"],
+            "Name a second goal of psychology.": ["understand", "causes"],
+            "Name a third goal of psychology.": ["predict", "behaviour"],
+            "Name a fourth goal of psychology.": ["influence", "control"],
+            "Name a fifth goal of psychology.": ["apply", "knowledge"],
+            "What is basic psychological research?": ["knowledge", "own", "sake"],
+            "What is applied psychological research?": ["solve", "practical", "problems"],
+            "What is critical thinking in psychology?": ["evaluate", "evidence"],
+
+            // levels / nature-nurture / historical roots
+            "What is the biological level of analysis?": ["brain", "genetic"],
+            "What is the psychological level of analysis?": ["thoughts", "feelings"],
+            "What is the environmental level of analysis?": ["physical", "social"],
+            "What question is asked in the nature versus nurture debate?": ["biology", "experience"],
+            "What is mind body dualism?": ["separate", "spiritual"],
+            "What is monism?": ["same", "physical"],
+            "What is empiricism?": ["knowledge", "senses"],
+
+            // perspectives
+            "What does the psychodynamic perspective emphasise?": ["unconscious", "childhood"],
+            "What is psychoanalysis?": ["unconscious", "therapy"],
+            "What does the behavioural perspective focus on?": ["environment", "learning"],
+            "According to behaviourism what mainly determines behaviour?": ["habits", "stimuli"],
+            "What does the humanistic perspective emphasise?": ["free", "growth"],
+            "What is self-actualisation?": ["full", "potential"],
+            "What does the cognitive perspective study?": ["mental", "processes"],
+            "What is cognitive neuroscience?": ["brain", "cognitive"],
+            "What does the biological perspective examine?": ["brain", "bodily"],
+            "What does the sociocultural perspective focus on?": ["social", "culture"],
+            "What is evolutionary psychology interested in?": ["evolution", "behaviour"],
+            "What is positive psychology?": ["strengths", "fulfilment"],
+
+            // emotions / dual process / positive affect
+            "In psychology what is an emotion?": ["experience", "physiological"],
+            "What is affect in decision making?": ["feeling", "good", "bad"],
+            "According to dual process theory what describes System 1?": ["fast", "intuitive"],
+            "According to dual process theory what describes System 2?": ["slow", "analytical"],
+            "How does positive affect influence problem solving?": ["flexibility", "creativity"],
+            "In Isen’s studies what simple manipulation often induced positive affect?": ["gift", "sweets"],
+            "When stakes are high how does positive affect influence risk taking?": ["reduced", "risk"],
+            "When stakes are low how does positive affect influence risk taking?": ["increased", "risk"],
+            "How did positive affect influence doctors in Estrada et al.’s study?": ["creative", "quicker"],
+            "In Wilson’s poster study who was more satisfied with their choice after six weeks?": ["feelings", "choice"],
+            "What did Dijksterhuis and van Olden conclude about complex decisions?": ["unconscious", "better"],
+            "According to Caruso and Shafir how can thinking about mood affect choices?": ["imagine", "mood", "choices"],
+
+            // genocide / saving lives
+            "What is psychic numbing?": ["reduced", "sensitivity", "victims"],
+            "Normatively how should we value saving lives?": ["equal", "value"],
+            "Psychophysically how do people actually value saving lives?": ["diminishing", "sensitivity"],
+            "Do people prefer saving a higher proportion or a larger absolute number of lives?": ["higher", "proportion"],
+            "Why are images powerful in motivating help?": ["images", "emotion"],
+            "Are people more willing to help identifiable victims or statistical victims?": ["identifiable", "victim"],
+
+            // social psych / attraction / social cognition
+            "In social psychology what is social facilitation?": ["better", "presence"],
+            "In social psychology what is social loafing?": ["reduced", "effort"],
+            "Name one antecedent of attraction from social psychology.": ["physical", "attractiveness"],
+            "Name a second antecedent of attraction.": ["proximity", "interaction"],
+            "Name a third antecedent of attraction.": ["mere", "exposure"],
+            "Name a fourth antecedent of attraction.": ["similarity", "attitudes"],
+            "What is the mere exposure effect in attraction?": ["repeated", "familiarity"],
+            "What is the halo effect in social perception?": ["attractive", "positive", "traits"],
+            "What is a personal or internal attribution?": ["traits", "abilities"],
+            "What is a situational or external attribution?": ["situation", "context"],
+            "What is the actor observer bias?": ["ourselves", "situation", "others", "traits"],
+
+            // prejudice / social identity / comparison
+            "What is discrimination in social psychology?": ["negative", "behaviour"],
+            "What is an ingroup?": ["us", "belong"],
+            "What is an outgroup?": ["them", "other"],
+            "According to social identity theory what does group membership provide?": ["self", "place"],
+            "What is social categorisation?": ["divide", "groups"],
+            "What is social comparison theory?": ["evaluate", "compare"],
+            "What is an upward social comparison?": ["better", "off"],
+            "What is a downward social comparison?": ["worse", "off"],
+
+            // developmental psych
+            "What does developmental psychology study?": ["changes", "lifespan"],
+            "What is meant by plasticity in development?": ["capacity", "change"],
+            "What is a critical period in development?": ["must", "experience"],
+            "What is a sensitive period in development?": ["especially", "influential"],
+
+            // attachment / early emotions
+            "According to attachment theory what is a secure base?": ["safety", "explore"],
+            "In the strange situation what is avoidant attachment?": ["little", "distress", "avoids"],
+            "In the strange situation what is resistant attachment?": ["very", "distressed", "not", "soothed"],
+            "In the strange situation what is disorganised attachment?": ["contradictory", "confused"],
+            "What is primary intersubjectivity?": ["mutual", "emotional", "exchange"],
+            "What is social smiling in infancy?": ["smile", "person"],
+
+            // sensory development
+            "How do newborns prefer to listen in hearing studies?": ["mother", "voice"],
+            "What can young infants do with speech sounds?": ["distinguish", "phonemes"],
+            "What visual stimuli do newborns particularly prefer?": ["faces", "eyes"],
+            "What is habituation in infant research?": ["decreased", "response"],
+
+            // Piaget
+            "According to Piaget what is a schema?": ["mental", "structure"],
+            "In Piagetian theory what is assimilation?": ["fit", "existing"],
+            "In Piagetian theory what is accommodation?": ["change", "schema"],
+            "What is Piaget’s sensorimotor stage?": ["birth", "two", "actions"],
+            "What is Piaget’s preoperational stage?": ["symbols", "egocentrism"],
+            "What is Piaget’s concrete operational stage?": ["logical", "concrete"],
+            "What is Piaget’s formal operational stage?": ["abstract", "hypothetical"],
+            "What is object permanence?": ["exists", "out", "sight"],
+            "What is the A not B error?": ["old", "location", "search"]
+        };
+
+        let allQuestions = [];
+        let currentQueue = [];
+        let currentQuestion = null;
+        let score = { correct: 0, total: 0 };
+        let streak = 0;
+
+        const welcome = document.getElementById('welcome');
+        const app = document.getElementById('flashcard-app');
+        const card = document.getElementById('card');
+        const cardContent = document.getElementById('card-content');
+        const tagEl = document.getElementById('tag');
+        const answerInput = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const scoreEl = document.getElementById('score');
+        const remainingEl = document.getElementById('remaining');
+        const streakEl = document.getElementById('streak');
+        const tagSelector = document.getElementById('tag-selector');
+        const tagDropdown = document.getElementById('tag-dropdown');
+        const selectedTagsEl = document.getElementById('selected-tags');
+        const clearTagsBtn = document.getElementById('clear-tags-btn');
+        const mixedBtn = document.getElementById('mixed-btn');
+        const toggleTagsBtn = document.getElementById('toggle-tags-btn');
+        const showTagsBtn = document.getElementById('show-tags-btn');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const fullscreenToggle = document.getElementById('fullscreen-toggle');
+
+        const selectedTags = new Set();
+
+        function updateStats() {
+            scoreEl.textContent = `${score.correct} / ${score.total}`;
+            remainingEl.textContent = currentQueue.length;
+            streakEl.textContent = streak;
+        }
+
+        function shuffle(array) {
+            const a = [...array];
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        function boostTag(tag) {
+            const related = allQuestions.filter(q => q.tag === tag && !currentQueue.includes(q));
+            if (related.length > 0) currentQueue.push(...shuffle(related).slice(0, 3));
+        }
+
+        function renderSelectedTags() {
+            selectedTagsEl.innerHTML = '';
+            selectedTags.forEach(tag => {
+                const pill = document.createElement('span');
+                pill.className = 'tag-pill';
+                pill.innerHTML = `
+                    <span>${tag.toUpperCase()}</span>
+                    <button type="button" data-tag="${tag}">×</button>
+                `;
+                selectedTagsEl.appendChild(pill);
+            });
+        }
+
+        function rebuildQueue() {
+            if (selectedTags.size === 0) {
+                currentQueue = [];
+                tagEl.textContent = '';
+                cardContent.textContent = 'Select at least one tag to start!';
+                answerInput.disabled = true;
+                submitBtn.disabled = true;
+                updateStats();
+            } else {
+                const filtered = allQuestions.filter(q => selectedTags.has(q.tag));
+                currentQueue = shuffle([...filtered]);
+                answerInput.disabled = false;
+                submitBtn.disabled = false;
+                updateStats();
+                nextQuestion();
+            }
+        }
+
+        clearTagsBtn.addEventListener('click', () => {
+            selectedTags.clear();
+            renderSelectedTags();
+            rebuildQueue();
+        });
+
+        selectedTagsEl.addEventListener('click', (e) => {
+            if (e.target.tagName.toLowerCase() === 'button') {
+                const tag = e.target.dataset.tag;
+                selectedTags.delete(tag);
+                renderSelectedTags();
+                rebuildQueue();
+            }
+        });
+
+        // Mixed button: select ALL tags and start mixed session
+        mixedBtn.addEventListener('click', () => {
+            if (!allQuestions.length) return;
+            selectedTags.clear();
+            const uniqueTags = [...new Set(allQuestions.map(q => q.tag))];
+            uniqueTags.forEach(tag => selectedTags.add(tag));
+            renderSelectedTags();
+            rebuildQueue();
+        });
+
+        // Hide tag box
+        toggleTagsBtn.addEventListener('click', () => {
+            tagSelector.style.display = 'none';
+            showTagsBtn.style.display = 'inline-flex';
+        });
+
+        // Show tag box again
+        showTagsBtn.addEventListener('click', () => {
+            tagSelector.style.display = 'block';
+            showTagsBtn.style.display = 'none';
+        });
+
+        // Sidebar collapse/expand
+        sidebarToggle.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-collapsed');
+        });
+
+        // Fullscreen toggle
+        fullscreenToggle.addEventListener('click', () => {
+            document.body.classList.toggle('fullscreen');
+            fullscreenToggle.textContent = document.body.classList.contains('fullscreen') ? '⤡' : '⤢';
+        });
+
+        document.querySelectorAll('.topic-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.topic-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const topic = item.dataset.topic;
+                allQuestions = topics[topic] || [];
+
+                // Populate dropdown with unique tags
+                const uniqueTags = [...new Set(allQuestions.map(q => q.tag))].sort();
+                tagDropdown.innerHTML = `<option value="" disabled selected>Select a tag...</option>` +
+                    uniqueTags.map(t =>
+                        `<option value="${t}">${t.replace(/_/g, ' ')}</option>`
+                    ).join('');
+
+                selectedTags.clear();
+                renderSelectedTags();
+                currentQueue = [];
+                score = { correct: 0, total: 0 };
+                streak = 0;
+
+                tagSelector.style.display = 'block';
+                showTagsBtn.style.display = 'none';
+                welcome.style.display = 'none';
+                app.style.display = 'block';
+
+                cardContent.textContent = 'Pick tags from the dropdown or hit Mixed to start!';
+                tagEl.textContent = '';
+                answerInput.disabled = true;
+                submitBtn.disabled = true;
+
+                updateStats();
+            });
+        });
+
+        // Dropdown: add tag as pill on change
+        tagDropdown.addEventListener('change', () => {
+            const val = tagDropdown.value;
+            if (!val || selectedTags.has(val)) return;
+            selectedTags.add(val);
+            renderSelectedTags();
+            rebuildQueue();
+            tagDropdown.value = "";
+        });
+
+        function nextQuestion() {
+            if (currentQueue.length === 0) {
+                cardContent.innerHTML = `<strong>All done!</strong><br>Final Score: ${score.correct}/${score.total}<br>Outstanding!`;
+                tagEl.textContent = "COMPLETE";
+                answerInput.disabled = true;
+                submitBtn.disabled = true;
+                return;
+            }
+
+            currentQuestion = currentQueue.shift();
+            cardContent.textContent = currentQuestion.q;
+            tagEl.textContent = currentQuestion.tag.toUpperCase();
+            card.classList.remove('correct', 'incorrect');
+            answerInput.value = '';
+            answerInput.disabled = false;
+            answerInput.focus();
+            updateStats();
+        }
+
+        function checkAnswer() {
+            const user = answerInput.value.trim().toLowerCase();
+            if (!user) return;
+
+            const correct = currentQuestion.a.toLowerCase();
+            let isCorrect = false;
+
+            // Smart keyword matching for Psychology
+            if (topics.psychology.includes(currentQuestion)) {
+                const keywords = keywordMap[currentQuestion.q];
+                if (keywords) {
+                    const matched = keywords.filter(k => user.includes(k)).length;
+                    isCorrect = matched >= keywords.length * 0.7;
+                }
+            }
+
+            // Fallback exact match
+            if (!isCorrect) {
+                const clean = s => s.replace(/[^a-z0-9]/g, '');
+                isCorrect = clean(user) === clean(correct) || user === correct;
+            }
+
+            score.total++;
+            if (isCorrect) {
+                score.correct++;
+                streak++;
+                card.classList.add('correct');
+                cardContent.innerHTML = "Correct!";
+            } else {
+                streak = 0;
+                card.classList.add('incorrect');
+                cardContent.innerHTML = `Wrong<br><br>Correct: <strong>${currentQuestion.a}</strong>`;
+                boostTag(currentQuestion.tag);
+            }
+
+            updateStats();
+            answerInput.disabled = true;
+            submitBtn.style.display = 'none';
+            nextBtn.style.display = 'inline';
+        }
+
+        submitBtn.onclick = checkAnswer;
+        answerInput.addEventListener('keypress', e => e.key === 'Enter' && checkAnswer());
+        nextBtn.onclick = () => {
+            card.classList.remove('correct', 'incorrect');
+            submitBtn.style.display = 'inline';
+            nextBtn.style.display = 'none';
+            answerInput.disabled = false;
+            answerInput.value = '';
+            nextQuestion();
+        };
+
+        tagDropdown.selectedIndex = -1;
+    </script>
+</body>
+</html>
